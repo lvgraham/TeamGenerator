@@ -1,24 +1,3 @@
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different mainQuestions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
-
-
 const Manager = require("./Develop/lib/Manager");
 const Engineer = require("./Develop/lib/Engineer");
 const Intern = require("./Develop/lib/Intern");
@@ -33,7 +12,7 @@ const render = require("./Develop/lib/htmlRenderer");
 
 const team = [];
 
-// Main mainQuestions 
+// main questions (applicable for all employees) 
 const mainQuestions = [
     {
         type: 'input',
@@ -62,7 +41,7 @@ const mainQuestions = [
     },
 ]
 
-// Manager mainQuestions
+// manager questions
 const mgrQuestions = [
     {
         type: 'input',
@@ -71,7 +50,7 @@ const mgrQuestions = [
     }
 ]
 
-// Intern mainQuestions
+// intern questions
 const internQuestions = [
     {
         type: 'input',
@@ -80,7 +59,7 @@ const internQuestions = [
     }
 ]
 
-// Engineer mainQuestions
+// engineer questions
 const engineerQuestions = [
     {
         type: 'input',
@@ -106,7 +85,7 @@ async function Question() {
         let mainAnswers = await inquirer.prompt(mainQuestions);
 
         //figures out role and then chooses next question
-        let role = await sendToNextPrompt(mainAnswers);
+        let role = await nextQuestion(mainAnswers);
 
         // get the role specific mainQuestions
         let roleAnswers = await inquirer.prompt(role);
@@ -120,86 +99,71 @@ async function Question() {
        //pushing the created employee to the team array
         team.push(employee);
 
-        //once first employee is complete, ask if you would like to create a new employee
+        //ask if another employee needs to be created
         let employeeAdd = await inquirer.prompt(addEmployee);
 
-        // validate response for the next action
+        //determines if new employee needs to be created or if the file needs to be written based on user response
         addMoreOrCreateEmployee(employeeAdd.confirm);
     }
     catch (err) {
-        console.log(`theres was an error somewhere in the async ${err}`);
+        console.log(`whoopsie! there has been an error: ${err}`);
     }
-
 }
 
-// builds a the new Employee with the specific constructor
+// creates the new employee
 function createEmployee(employee) {
     let name = employee.name;
     let id = employee.id;
     let email = employee.email;
     let role = employee.role; 
 
-    // checking to see the correct keys and values 
-    // console.log('inside the build employee function',employee);
-
     switch (role) {
         case 'Manager': return new Manager(name, id, email, employee.officeNumber);
         case 'Intern': return new Intern(name, id, email, employee.school);
         case 'Engineer': return new Engineer(name, id, email, employee.gitHub);
-        default: return 'something went really wrong in building an employee';
+        default: return `Uh oh, this employee couldn't be created.`;
     }
 }
 
-// this function returns the specific role mainQuestions needed for the next prompt 
-function sendToNextPrompt(employee) {
-    // let role;
-
-    // testing the color ui
-    // console.log('this is inside the next prompt',employee);
-
-    // testing output
-    // console.log(employee); 
+//sends user too next question after receiving role designation
+function nextQuestion(employee) {
 
     switch (employee.role) {
         case 'Manager': return mgrQuestions
-s
     ;
         case 'Intern': return internQuestions
     ;
         case 'Engineer': return engineerQuestions
     ;
-        default: return `Something went really wrong! did you pick a role?`;
+        default: return `hmmm, did you selet a role?`;
     }
 }
 
-// restarts the whole thing again or returns for the next step 
+// starts from the beginning if you select to add new employee, if not it writes the HTML file 
 function addMoreOrCreateEmployee(confirm) {
     if (confirm) {
-        // return back to the top of the mainQuestionsare add in another employee 
         return Question();
     }
 
-    //// checking to see if this directory exist 
+    //does the output directory exist?
     fs.access(OUTPUT_DIR, (err) => {
         if (err) {
-
-            // if it doesn't exist we make it and then create the file 
-            console.log(`This directory does not exist, Creating now!!!`);
+            // if the output DIR doesn't exist, create it & then add the HTML
             fs.mkdir(OUTPUT_DIR, (err) => (err) ? console.log(err) : writeHTML());
         } else {
 
-            //// else we just create the html 
+            //if directory does exist, just write the HTML
             writeHTML();
         }
     })
 }
 
-// function writes the html for the website 
+// writes HTML
 function writeHTML() {
     let html = render(team)
 
     fs.writeFile(outputPath, html, (err) => {
-        (err) ? console.log(err) : console.log('The file has been written succesfully!');
+        (err) ? console.log(err) : console.log('Congrats! Enjoy your employee page.');
     });
 }
 
