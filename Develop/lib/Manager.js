@@ -13,6 +13,10 @@ class Manager extends Employee {
     }
 }
 
+Manager.prototype.getRole = function() {
+    return this.role; 
+}
+
 Manager.prototype.getOfficeNumber = function() {
     return this.officeNumber;
 }
